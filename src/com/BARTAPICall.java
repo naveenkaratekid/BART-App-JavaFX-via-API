@@ -27,6 +27,7 @@ import javafx.stage.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -123,17 +124,76 @@ public class BARTAPICall {
 			List<JsonNode> city = (ArrayList<JsonNode>) jsonNode.findValues("city");
 			List<JsonNode> state = (ArrayList<JsonNode>) jsonNode.findValues("state");
 			List<JsonNode> zipcode = (ArrayList<JsonNode>) jsonNode.findValues("zipcode");
-			List<JsonNode> south = (ArrayList<JsonNode>) jsonNode.findValues("north_platforms");
-			List<JsonNode> north = (ArrayList<JsonNode>) jsonNode.findValues("south_platforms");
+			List<JsonNode> route = (ArrayList<JsonNode>) jsonNode.findValues("route");
 			List<JsonNode> platform = (ArrayList<JsonNode>) jsonNode.findValues("platform");
 			
-			for(int i = 0; i < root.size();)
-			{	
-				info = stationName.get(i).toString() + " | " +  address.get(i).toString() + " " + city.get(i).toString() + " " + state.get(i).toString() + " " + zipcode.get(i).toString();
-
+			for(int i = 0; i < route.size();)
+			{
+				//System.out.println(route.get(i).toString());
+				info = stationName.get(i).toString() + " | " +  address.get(i).toString() + " " + city.get(i).toString() + " " + state.get(i).toString() + " " + zipcode.get(i).toString() + " | ";// + getLineName(route.get(i).toString());
 				return info;
 			}
+			
+			/*for(int i = 0; i < root.size();)
+			{	
+				
+				info = stationName.get(i).toString() + " | " +  address.get(i).toString() + " " + city.get(i).toString() + " " + state.get(i).toString() + " " + zipcode.get(i).toString() + " | " + getLineName(route.get(i).toString());
+				return info;
+			}*/
 			return "";			
+		}
+		
+		catch(Exception e)
+		{
+			return null;
+		}	
+	}
+	
+	public static String getRouteNumber(String abbr) throws Exception
+	{
+		Response resp = null;
+		String url = "https://api.bart.gov/api/stn.aspx?cmd=stninfo&orig="+abbr+"&key=ZPBV-5VQB-98QT-DWE9&json=y";
+		Request request = new Request.Builder().url(url).get().build();
+		
+		try
+		{
+			resp = client.newCall(request).execute();
+		}
+		catch(Exception e)
+		{
+			System.out.println("No connection");
+		}
+		
+		String s = resp.body().string();
+		
+		try
+		{
+			
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode jsonNode = mapper.readTree(s);
+			
+			String info = "";
+
+			List<JsonNode> route = (ArrayList<JsonNode>) jsonNode.findValues("route");
+			//List<JsonNode> platform = (ArrayList<JsonNode>) jsonNode.findValues("platform");
+			ArrayList<String> listOfRoutes = new ArrayList<String>();
+			//System.out.println("Route: "  + route.size());
+			for(int i = 0; i < route.size();i++)
+			{
+				
+				info = route.get(i).toString().trim();
+				listOfRoutes.add(info);
+				
+			}
+
+			return listOfRoutes.toString();
+			
+			/*for(int i = 0; i < root.size();)
+			{	
+				
+				info = stationName.get(i).toString() + " | " +  address.get(i).toString() + " " + city.get(i).toString() + " " + state.get(i).toString() + " " + zipcode.get(i).toString() + " | " + getLineName(route.get(i).toString());
+				return info;
+			}*/		
 		}
 		
 		catch(Exception e)
@@ -260,6 +320,13 @@ public class BARTAPICall {
 		{
 			throw new Exception("No connection");
 		}
+		
+		GridPane gp = new GridPane();
+		gp.setAlignment(Pos.CENTER);
+	
+		Stage s11 = new Stage();
+		s11.setResizable(true);
+		
 		String s = resp.body().string();
 		JSONObject jo = new JSONObject(s);
         JSONObject jo1 = jo.getJSONObject("root");
@@ -267,43 +334,69 @@ public class BARTAPICall {
         
         for(int i = 0; i < ja1.length(); i++)
         {
-        		System.out.println(ja1.length());
+        		//System.out.println(ja1.length());
         		JSONObject jo2 = ja1.getJSONObject(i);
         		//for(int j = 0; j < jo2.length(); j++) 
         		//{
-    			JSONArray ja2 = jo2.getJSONArray("etd");
-    			for(int j = 0; j < ja2.length(); j++)
-    			{
-    				JSONObject jo3 = ja2.getJSONObject(j);
-        			String dest = jo3.getString("destination");
-    				System.out.println(dest);
-    				
-    				JSONArray estimate = jo3.getJSONArray("estimate");
-    				JSONObject jo4 = estimate.getJSONObject(i);
-    				String minutes = jo4.getString("minutes");
-    				String platform = jo4.getString("platform");
-    				String length = jo4.getString("length");
-    				System.out.println(length + " Car Train" + "\t " + minutes + " Minutes");
-    				System.out.println("Platform " + platform);
-    				System.out.println();
-    			}
-        			/*JSONObject jo3 = ja2.getJSONObject(j);
-        			String dest = jo3.getString("destination");
-    				System.out.println(dest);
-    				JSONArray estimate = jo3.getJSONArray("estimate");
-    				JSONObject jo4 = estimate.getJSONObject(j);
-				String minutes = jo4.getString("minutes");
-				String platform = jo4.getString("platform");
-				String length = jo4.getString("length");
-				System.out.println(length + " Car Train" + "\t " + minutes + " Minutes");
-				System.out.println("Platform " + platform);
-				System.out.println();*/
-        		//}
-        		
+        		try
+        		{
+        			JSONArray ja2 = jo2.getJSONArray("etd");
+	    			for(int j = 0; j < ja2.length(); j++)
+	    			{
+	    				JSONObject jo3 = ja2.getJSONObject(j);
+	        			String dest = jo3.getString("destination");
+	    				System.out.println(dest);
+	    				Text trainDest = new Text(dest);
+	        			trainDest.setTranslateX(10);
+	        			trainDest.setTranslateY(-180 + (47 * j));
+	        			trainDest.setFont(Font.font("Arial", FontWeight.NORMAL, 11));
+	        			gp.add(trainDest, 0, 0);
+	    				
+	    				JSONArray estimate = jo3.getJSONArray("estimate");
+	    				JSONObject jo4 = estimate.getJSONObject(i);
+	    				
+	    				String hex = jo4.getString("hexcolor");
+	    				
+	    				String minutes = jo4.getString("minutes");
+	    				String platform = jo4.getString("platform");
+	    				String length = jo4.getString("length");
+	    				Text minLength = new Text(length + " Car Train\t" + (minutes.contains("Leaving") ? "Leaving": minutes + " Minutes"));
+	    				minLength.setTranslateX(10);
+	    				minLength.setTranslateY(-170 + (47 * j));
+	    				minLength.setFont(Font.font("Arial", FontWeight.NORMAL, 11));
+	        			gp.add(minLength, 0, 0);
+	        			
+	        			
+	    				System.out.println((length + " Car Train") + "\t" + (minutes.contains("Leaving") ? "Leaving": minutes + " Minutes"));
+	    				System.out.println("Platform " + platform);
+	    				Text plat = new Text("Platform " + platform);
+	    				System.out.println(hex);
+	    				plat.setTranslateX(10);
+	    				plat.setTranslateY(-160 + (47 * j));
+	    				plat.setFont(Font.font("Arial", FontWeight.NORMAL, 11));
+	        			gp.add(plat, 0, 0);
+	    				System.out.println();
+	    				
+	    				
+	    			}
+        		}
+        		catch(Exception e)
+        		{
+        			Label l = new Label("No trains leaving at this time");
+        			l.setFont(new Font("Arial", 10));
+        			l.setTranslateX(10);
+        			l.setTranslateY(100);
+        			gp.add(l, 0, 0);
+        			System.out.println("No trains leaving");
+        		}
+    			
         }
+        s11.setWidth(500);
+        s11.setHeight(400);
         
-		
-		
+        Scene scene = new Scene(gp);
+        s11.setScene(scene);
+        s11.show(); 
 	}
 	
 	public static void getTripInfo(String start, String dest, Map<String, String> stationAbbr) throws Exception
@@ -342,8 +435,7 @@ public class BARTAPICall {
     			gp.setAlignment(Pos.CENTER);
 			
     			Stage s11 = new Stage();
-			s11.setResizable(false);
-    			
+    			s11.setResizable(true);
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode jsonNode = mapper.readTree(s);
 			
@@ -464,14 +556,14 @@ public class BARTAPICall {
 	
 	public static String getLineName(String line)
 	{
+		
 		switch(line)
 		{
 		case "ROUTE 1":
-			return "Pittsburg/Bay Point - San Francisco International Airport/Millbrae";
-			
+			return "Antioch - San Francisco International Airport/Millbrae";		
 		
 		case "ROUTE 2":
-			return "Millbrae/San Francisco International Airport - Pittsburg/Bay Point";
+			return "Millbrae/San Francisco International Airport - Antioch";
 		
 		case "ROUTE 3":
 			return "Warm Springs/South Fremont - Richmond";
@@ -513,7 +605,7 @@ public class BARTAPICall {
 	public static void main(String[] args) throws Exception 
 	{
 		
-		getRealTime("CIVC");
+		getRealTime("balb");
 		/*Map<String, String> mapOfStations = getStationList();
 		
 		for(Map.Entry<String, String> m1: mapOfStations.entrySet())
