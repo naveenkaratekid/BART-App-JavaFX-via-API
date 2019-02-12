@@ -378,6 +378,7 @@ public class BARTAPICall {
 	    				String platform = jo4.getString("platform");
 	    				String length = jo4.getString("length");
 	    				Text minLength = new Text();
+	    				
 	    				minLength.setTranslateX(0);
 	    				//minLength.setTranslateY(-160 + (60 * j));
 	    				minLength.setTranslateY(-160 + (55 * j));
@@ -391,6 +392,11 @@ public class BARTAPICall {
 	        			//System.out.println("Platform " + platform);
 	    				Text plat = new Text((platform.contains("1") || platform.contains("3") ? "\t\t\t\t\t\t\t\tPlatform " : "Platform ") + platform);
 	    				minLength.setText((platform.contains("1") || platform.contains("3") ? "\t\t\t\t\t\t\t\t" : "") + length + " Car Train\t\t" + (minutes.contains("Leaving") ? "Leaving": minutes + " Minutes"));
+	    				
+	    				if(minutes.contains("2") || minutes.contains("1"))
+	    				{
+	    					
+	    				}
 	    				trainDest.setText((platform.contains("1") || platform.contains("3") ? "\t\t\t\t\t\t\t\t" : "") /*+ dest*/);
 	    				
 	    				destName.setText((platform.contains("1") || platform.contains("3") ? "\t\t\t\t\t\t\t\t    " : "") + dest);
