@@ -48,6 +48,7 @@ public class BARTAPICall {
 	//private static enum options {stationInfo, tripPlanner};
 	private static Scanner scanner;
 	private static Logger logger = LoggerFactory.getLogger(BARTAPICall.class);
+	
 	public static Map<String, String> getStationList() throws Exception
 	{
 		
@@ -65,8 +66,17 @@ public class BARTAPICall {
 			//System.out.println("No connection");
 		}
 		
-		String s = resp.body().string();
-		
+		//String s = resp.body().string();
+		String s = "";
+		try
+		{
+			s = resp.body().string();
+		}
+		catch(Exception e)
+		{
+			System.out.println("No response");
+			logger.error("No response");
+		}
 		try
 		{
 			
@@ -455,11 +465,22 @@ public class BARTAPICall {
 		catch(Exception e)
 		{
 			logger.error("No connection");
+			e.printStackTrace();
 			//System.out.println("No connection");
 		}
+		
+		
 		String s = resp.body().string();
 		System.out.println(s);
-		
+		/*if(s == null)
+		{
+			logger.error("Response is taking too long");
+			System.out.println("Response is taking too long");
+		}
+		else
+		{
+			System.out.println(s);
+		}*/
 		if(start.equals(dest) || dest.equals(start))
 		{
 			//GridPane gp = new GridPane();
